@@ -1,0 +1,174 @@
+{% extends "inventario/base.html" %}
+{% load static %}
+
+{% block title %}Controle · SAURON{% endblock %}
+
+{% block content %}
+<section class="controle">
+  <div class="container">
+    {% if messages %}
+      <div class="messages" role="status" aria-live="polite">
+        {% for message in messages %}
+          <p class="message message--{{ message.tags }}">{{ message }}</p>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <h1 class="section-title">Controle</h1>
+    <p class="controle__date">Expediente de {{ hoje|date:"d/m/Y" }}</p>
+
+    {% if usuarios %}
+      <form class="controle-form" method="post" action="">
+        {% csrf_token %}
+
+        <div class="controle-form__grid">
+          <div class="field">
+            <label for="controle-hhid">HHID *</label>
+            <input id="controle-hhid"
+                   name="hhid"
+                   type="text"
+                   value="{{ hhid_digitado }}"
+                   placeholder="H100"
+                   maxlength="10"
+                   autocomplete="off"
+                   required
+                   data-url-busca="{% url 'inventario:buscar_equipamento' 'HHID' %}">
+          </div>
+
+          <div class="field">
+            <label for="controle-equipamento">Equipamento</label>
+            <input id="controle-equipamento"
+                   type="text"
+                   placeholder="Preenchido pelo HHID"
+                   readonly>
+          </div>
+
+          <div class="field">
+            <label for="controle-usuario">Usuário *</label>
+            <select id="controle-usuario" name="id_usuario" required>
+              <option value="">Selecione</option>
+              {% for usuario in usuarios %}
+                <option value="{{ usuario.id }}"
+                  {% if usuario.id|stringformat:"s" == usuario_selecionado %}selected{% endif %}>
+                  {{ usuario.username }} ({{ usuario.turma }})
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="controle-form__action">
+            <button class="btn" type="submit">Registrar entrada</button>
+          </div>
+        </div>
+      </form>
+
+      <p class="controle__feedback" id="controle-feedback" hidden>
+        Equipamento não encontrado.
+        <a href="{% url 'inventario:cadastro' %}" target="_blank" rel="noopener">
+          Cadastrar agora
+        </a>
+      </p>
+    {% else %}
+      <p class="controle__feedback">
+        Nenhum usuário cadastrado.
+        <a href="{% url 'inventario:cadastro' %}">Cadastre um usuário primeiro</a>.
+      </p>
+    {% endif %}
+
+    <div class="table-wrap">
+      <table class="data-table controle-table">
+        <caption class="sr-only">Controle do expediente</caption>
+        <thead>
+          <tr>
+            <th scope="col">HHID</th>
+            <th scope="col">Equipamento</th>
+            <th scope="col">User</th>
+            <th scope="col" class="check-col">Entry-OP</th>
+            <th scope="col" class="check-col">In-Lauch</th>
+            <th scope="col" class="check-col">Out-Lauch</th>
+            <th scope="col" class="check-col">Out-OP</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for controle in controles %}
+            <tr>
+              <td><span class="cell-box">{{ controle.equipamento.hhid }}</span></td>
+              <td><span class="cell-box">{{ controle.equipamento.nome }}</span></td>
+              <td><span class="cell-box">{{ controle.usuario.username }}</span></td>
+
+              <td class="check-cell">
+                <span class="check check--done"
+                      title="{{ controle.entry_op|date:'d/m/Y H:i' }}"></span>
+              </td>
+
+              <td class="check-cell">
+                {% if controle.in_lauch %}
+                  <span class="check check--done"
+                        title="{{ controle.in_lauch|date:'d/m/Y H:i' }}"></span>
+                {% elif controle.proxima_etapa == "in_lauch" %}
+                  <form method="post"
+                        action="{% url 'inventario:controle_etapa' controle.id %}"
+                        class="check-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="etapa" value="in_lauch">
+                    <button class="check check--next" type="submit"
+                            aria-label="Registrar IN-LAUCH"></button>
+                  </form>
+                {% else %}
+                  <span class="check check--locked"></span>
+                {% endif %}
+              </td>
+
+              <td class="check-cell">
+                {% if controle.out_lauch %}
+                  <span class="check check--done"
+                        title="{{ controle.out_lauch|date:'d/m/Y H:i' }}"></span>
+                {% elif controle.proxima_etapa == "out_lauch" %}
+                  <form method="post"
+                        action="{% url 'inventario:controle_etapa' controle.id %}"
+                        class="check-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="etapa" value="out_lauch">
+                    <button class="check check--next" type="submit"
+                            aria-label="Registrar OUT-LAUCH"></button>
+                  </form>
+                {% else %}
+                  <span class="check check--locked"></span>
+                {% endif %}
+              </td>
+
+              <td class="check-cell">
+                {% if controle.out_op %}
+                  <span class="check check--done"
+                        title="{{ controle.out_op|date:'d/m/Y H:i' }}"></span>
+                {% elif controle.proxima_etapa == "out_op" %}
+                  <form method="post"
+                        action="{% url 'inventario:controle_etapa' controle.id %}"
+                        class="check-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="etapa" value="out_op">
+                    <button class="check check--next" type="submit"
+                            aria-label="Registrar OUT-OP"></button>
+                  </form>
+                {% else %}
+                  <span class="check check--locked"></span>
+                {% endif %}
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="7" class="data-table__empty">
+                Nenhum controle registrado hoje.
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{% static 'inventario/js/controle.js' %}"></script>
+{% endblock %}

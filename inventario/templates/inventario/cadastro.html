@@ -1,0 +1,267 @@
+{% extends "inventario/base.html" %}
+{% load static %}
+
+{% block title %}Cadastro · SAURON{% endblock %}
+
+{% block content %}
+<section class="register">
+  <div class="container">
+    {% if messages %}
+      <div class="messages" role="status" aria-live="polite">
+        {% for message in messages %}
+          <p class="message message--{{ message.tags }}">{{ message }}</p>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <h1 class="section-title">Cadastro</h1>
+
+    <div class="tabs-block" data-tabs data-active-tab="{{ aba_ativa }}">
+      <div class="tabs" role="tablist" aria-label="Tipo de cadastro">
+        <button class="tab is-active"
+                id="tab-equipamento"
+                role="tab"
+                type="button"
+                aria-selected="true"
+                aria-controls="panel-equipamento"
+                data-tab="equipamento">Equipamento</button>
+
+        <button class="tab"
+                id="tab-usuario"
+                role="tab"
+                type="button"
+                aria-selected="false"
+                aria-controls="panel-usuario"
+                data-tab="usuario"
+                tabindex="-1">Usuário</button>
+      </div>
+
+      <div class="panel" id="panel-equipamento" role="tabpanel" aria-labelledby="tab-equipamento">
+        <form class="form" method="post" action="">
+          {% csrf_token %}
+          <input type="hidden" name="form_type" value="equipamento">
+
+          {% if form.non_field_errors %}
+            <div class="form__errors">{{ form.non_field_errors }}</div>
+          {% endif %}
+
+          <div class="form__grid">
+            <div class="field">
+              <label for="{{ form.hhid.id_for_label }}">HHID *</label>
+              {{ form.hhid }}
+              <small class="field__hint" id="eq-hhid-hint">
+                3 a 10 caracteres: letras, números ou hífen.
+              </small>
+              {% for error in form.hhid.errors %}
+                <small class="field__error">{{ error }}</small>
+              {% endfor %}
+            </div>
+
+            <div class="field">
+              <label for="{{ form.nome.id_for_label }}">Equipamento *</label>
+              {{ form.nome }}
+              {% for error in form.nome.errors %}
+                <small class="field__error">{{ error }}</small>
+              {% endfor %}
+            </div>
+
+            <div class="field">
+              <label for="{{ form.status.id_for_label }}">Status *</label>
+              {{ form.status }}
+              {% for error in form.status.errors %}
+                <small class="field__error">{{ error }}</small>
+              {% endfor %}
+            </div>
+          </div>
+
+          <button class="btn" type="submit">Cadastrar equipamento</button>
+        </form>
+      </div>
+
+      <div class="panel" id="panel-usuario" role="tabpanel" aria-labelledby="tab-usuario" hidden>
+        <form class="form" method="post" action="">
+          {% csrf_token %}
+          <input type="hidden" name="form_type" value="usuario">
+
+          {% if form_usuario.non_field_errors %}
+            <div class="form__errors">{{ form_usuario.non_field_errors }}</div>
+          {% endif %}
+
+          <div class="form__grid">
+            <div class="field">
+              <label for="{{ form_usuario.id_usuario.id_for_label }}">ID *</label>
+              {{ form_usuario.id_usuario }}
+              {% for error in form_usuario.id_usuario.errors %}
+                <small class="field__error">{{ error }}</small>
+              {% endfor %}
+            </div>
+
+            <div class="field">
+              <label for="{{ form_usuario.username.id_for_label }}">Username *</label>
+              {{ form_usuario.username }}
+              {% for error in form_usuario.username.errors %}
+                <small class="field__error">{{ error }}</small>
+              {% endfor %}
+            </div>
+
+            <div class="field">
+              <label for="{{ form_usuario.turma.id_for_label }}">Turma *</label>
+              {{ form_usuario.turma }}
+              {% for error in form_usuario.turma.errors %}
+                <small class="field__error">{{ error }}</small>
+              {% endfor %}
+            </div>
+
+            <div class="field">
+              <label for="{{ form_usuario.diretrix.id_for_label }}">Diretrix *</label>
+              {{ form_usuario.diretrix }}
+              {% for error in form_usuario.diretrix.errors %}
+                <small class="field__error">{{ error }}</small>
+              {% endfor %}
+            </div>
+          </div>
+
+          <button class="btn" type="submit">Cadastrar usuário</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="consulta" id="consulta">
+  <div class="container">
+    <h2 class="section-title">Consulta</h2>
+
+    <div class="tabs-block" data-tabs>
+      <div class="tabs" role="tablist" aria-label="Consultar cadastros">
+        <button class="tab is-active"
+                id="tab-consulta-equipamentos"
+                role="tab"
+                type="button"
+                aria-selected="true"
+                aria-controls="panel-consulta-equipamentos">Equipamentos</button>
+
+        <button class="tab"
+                id="tab-consulta-usuarios"
+                role="tab"
+                type="button"
+                aria-selected="false"
+                aria-controls="panel-consulta-usuarios"
+                tabindex="-1">Usuários</button>
+      </div>
+
+      <!-- PAINEL DE EQUIPAMENTOS -->
+      <div class="panel" id="panel-consulta-equipamentos"
+           role="tabpanel" aria-labelledby="tab-consulta-equipamentos">
+
+        <div class="consulta__toolbar">
+          <div class="search">
+            <label class="sr-only" for="busca-equipamentos">Buscar equipamentos</label>
+            <input id="busca-equipamentos"
+                   type="search"
+                   data-filter
+                   placeholder="Buscar por HHID, nome ou status...">
+          </div>
+
+          <p class="consulta__count" data-count>
+            {{ equipamentos|length }} registro{{ equipamentos|length|pluralize }}
+          </p>
+        </div>
+
+        <div class="table-wrap">
+          <table class="data-table">
+            <caption class="sr-only">Equipamentos cadastrados</caption>
+            <thead>
+              <tr>
+                <th scope="col">HHID</th>
+                <th scope="col">Equipamento</th>
+                <th scope="col">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for eq in equipamentos %}
+                <tr data-row>
+                  <td>{{ eq.hhid }}</td>
+                  <td>{{ eq.nome }}</td>
+                  <td>
+                    <span class="status status--{{ eq.status }}">
+                      {{ eq.get_status_display }}
+                    </span>
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="3" class="data-table__empty">
+                    Nenhum equipamento cadastrado ainda.
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+
+          <p class="data-table__no-results" data-no-results hidden>
+            Nenhum resultado para esta busca.
+          </p>
+        </div>
+      </div>
+
+      <!-- PAINEL DE USUÁRIOS -->
+      <div class="panel" id="panel-consulta-usuarios"
+           role="tabpanel" aria-labelledby="tab-consulta-usuarios" hidden>
+
+        <div class="consulta__toolbar">
+          <div class="search">
+            <label class="sr-only" for="busca-usuarios">Buscar usuários</label>
+            <input id="busca-usuarios"
+                   type="search"
+                   data-filter
+                   placeholder="Buscar por ID, username, turma...">
+          </div>
+
+          <p class="consulta__count" data-count>
+            {{ usuarios|length }} registro{{ usuarios|length|pluralize }}
+          </p>
+        </div>
+
+        <div class="table-wrap">
+          <table class="data-table">
+            <caption class="sr-only">Usuários cadastrados</caption>
+            <thead>
+              <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Username</th>
+                <th scope="col">Turma</th>
+                <th scope="col">Diretrix</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for usuario in usuarios %}
+                <tr data-row>
+                  <td>{{ usuario.id_usuario }}</td>
+                  <td>{{ usuario.username }}</td>
+                  <td>{{ usuario.turma }}</td>
+                  <td>{{ usuario.diretrix }}</td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="4" class="data-table__empty">
+                    Nenhum usuário cadastrado ainda.
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+
+          <p class="data-table__no-results" data-no-results hidden>
+            Nenhum resultado para esta busca.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{% static 'inventario/js/cadastro.js' %}?v=2"></script>
+{% endblock %}

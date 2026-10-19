@@ -1,0 +1,35 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}SAURON · Inventário{% endblock %}</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Josefin+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="{% static 'inventario/css/style.css' %}?v=4">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="{% url 'inventario:cadastro' %}">SAURON</a>
+
+    <nav class="nav" aria-label="Navegação principal">
+      <a href="#" aria-disabled="true" tabindex="-1">HOME</a>
+      <a href="{% url 'inventario:controle' %}"
+         {% if request.resolver_match.url_name == 'controle' %}aria-current="page"{% endif %}>CONTROLE</a>
+      <a href="{% url 'inventario:cadastro' %}"
+         {% if request.resolver_match.url_name == 'cadastro' %}aria-current="page"{% endif %}>CADASTRO</a>
+      <a href="#" aria-disabled="true" tabindex="-1">MISSING</a>
+    </nav>
+  </header>
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>

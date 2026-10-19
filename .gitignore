@@ -1,0 +1,61 @@
+# ==========================================================
+# Python
+# ==========================================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.python
+
+# ==========================================================
+# Ambiente virtual
+# ==========================================================
+.venv/
+venv/
+env/
+ENV/
+
+# ==========================================================
+# Django
+# ==========================================================
+# Banco local de desenvolvimento (cada máquina gera o próprio)
+db.sqlite3
+db.sqlite3-journal
+*.sqlite3
+
+# Arquivos coletados pelo collectstatic e uploads de usuários
+/staticfiles/
+/media/
+
+# Configurações locais / segredos
+local_settings.py
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+
+# ==========================================================
+# Testes e cobertura
+# ==========================================================
+.coverage
+coverage.xml
+htmlcov/
+.pytest_cache/
+
+# ==========================================================
+# Editores e sistema operacional
+# ==========================================================
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ==========================================================
+# Referências visuais locais (imagens de terceiros)
+# ==========================================================
+/img/
